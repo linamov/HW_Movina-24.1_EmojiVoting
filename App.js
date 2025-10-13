@@ -5,13 +5,13 @@ class EmojiVoting extends React.Component {
     this.state = {
       emojis: ['😀', '😂', '😍', '😢', '😡'],
       votes: storedVotes,
-      winner: ''
+      winners: []
     };
   }
 
   vote = (emoji) => {
     this.setState(prevState => {
-      const votes = {...prevState.votes};
+      const votes = { ...prevState.votes };
       votes[emoji] = (votes[emoji] || 0) + 1;
       localStorage.setItem('votes', JSON.stringify(votes));
       return { votes };
@@ -21,27 +21,25 @@ class EmojiVoting extends React.Component {
   showResults = () => {
     const { votes, emojis } = this.state;
     let maxVote = 0;
-    let winner = '';
     emojis.forEach(e => {
       const v = votes[e] || 0;
-      if (v > maxVote) {
-        maxVote = v;
-        winner = e;
-      }
+      if (v > maxVote) maxVote = v;
     });
-    this.setState({ winner: maxVote > 0 ? `${winner} (${maxVote} голосів)` : 'Голосів ще немає' });
+
+    const winners = emojis.filter(e => (votes[e] || 0) === maxVote && maxVote > 0);
+    this.setState({ winners });
   }
 
   clearResults = () => {
     localStorage.removeItem('votes');
-    this.setState({ votes: {}, winner: '' });
+    this.setState({ votes: {}, winners: [] });
   }
 
   render() {
-    const { emojis, votes, winner } = this.state;
+    const { emojis, votes, winners } = this.state;
     return (
       <div className="container py-5 text-center">
-        <h1 className="mb-4">Голосування за смайлик</h1>
+        <h1 className="mb-4">Emoji Voting</h1>
         <div className="d-flex justify-content-center gap-3 mb-4">
           {emojis.map(e => (
             <button key={e} className="btn btn-light fs-2" onClick={() => this.vote(e)}>
@@ -50,10 +48,14 @@ class EmojiVoting extends React.Component {
           ))}
         </div>
         <div className="mb-3">
-          <button className="btn btn-primary me-2" onClick={this.showResults}>Показати результат</button>
-          <button className="btn btn-danger" onClick={this.clearResults}>Очистити результати</button>
+          <button className="btn btn-primary me-2" onClick={this.showResults}>Show Results</button>
+          <button className="btn btn-danger" onClick={this.clearResults}>Clear Results</button>
         </div>
-        {winner && <h3 className="mt-3">Переможець: {winner}</h3>}
+        {winners.length > 0 &&
+          <h3 className="mt-3">
+            Winner{winners.length > 1 ? 's' : ''}: {winners.join(', ')} ({votes[winners[0]]} votes)
+          </h3>
+        }
       </div>
     );
   }
