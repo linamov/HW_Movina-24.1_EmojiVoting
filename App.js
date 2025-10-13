@@ -4,7 +4,8 @@ class EmojiVoting extends React.Component {
     const storedVotes = JSON.parse(localStorage.getItem('votes')) || {};
     this.state = {
       emojis: ['😀', '😂', '😍', '😢', '😡'],
-      votes: storedVotes
+      votes: storedVotes,
+      winner: ''
     };
   }
 
@@ -28,19 +29,19 @@ class EmojiVoting extends React.Component {
         winner = e;
       }
     });
-    alert(maxVote > 0 ? `Winner: ${winner} with ${maxVote} votes` : "No votes yet!");
+    this.setState({ winner: maxVote > 0 ? `${winner} (${maxVote} голосів)` : 'Голосів ще немає' });
   }
 
   clearResults = () => {
     localStorage.removeItem('votes');
-    this.setState({ votes: {} });
+    this.setState({ votes: {}, winner: '' });
   }
 
   render() {
-    const { emojis, votes } = this.state;
+    const { emojis, votes, winner } = this.state;
     return (
       <div className="container py-5 text-center">
-        <h1 className="mb-4">Emoji Voting</h1>
+        <h1 className="mb-4">Голосування за смайлик</h1>
         <div className="d-flex justify-content-center gap-3 mb-4">
           {emojis.map(e => (
             <button key={e} className="btn btn-light fs-2" onClick={() => this.vote(e)}>
@@ -49,9 +50,10 @@ class EmojiVoting extends React.Component {
           ))}
         </div>
         <div className="mb-3">
-          <button className="btn btn-primary me-2" onClick={this.showResults}>Show Results</button>
+          <button className="btn btn-primary me-2" onClick={this.showResults}>Показати результат</button>
           <button className="btn btn-danger" onClick={this.clearResults}>Очистити результати</button>
         </div>
+        {winner && <h3 className="mt-3">Переможець: {winner}</h3>}
       </div>
     );
   }
